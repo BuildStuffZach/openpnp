@@ -56,6 +56,7 @@ import org.openpnp.model.LengthUnit;
 import org.openpnp.model.Location;
 import org.openpnp.model.Point;
 import org.openpnp.spi.Actuator;
+import org.openpnp.spi.Camera;
 import org.openpnp.spi.Head;
 import org.openpnp.spi.HeadMountable;
 import org.openpnp.spi.Machine;
@@ -64,6 +65,7 @@ import org.openpnp.spi.PasteDispenser;
 import org.openpnp.util.BeanUtils;
 import org.openpnp.util.MovableUtils;
 import org.openpnp.util.UiUtils;
+import org.openpnp.util.VisionUtils;
 
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -113,6 +115,11 @@ public class JogControlsPanel extends JPanel {
         xyParkAction.setEnabled(enabled);
         zParkAction.setEnabled(enabled);
         cParkAction.setEnabled(enabled);
+        botAction.setEnabled(enabled);
+        machineControlsPanel.vacOffAction.setEnabled(enabled);
+        machineControlsPanel.vacOnAction.setEnabled(enabled);
+        
+        
         for (Component c : panelActuators.getComponents()) {
             c.setEnabled(enabled);
         }
@@ -127,17 +134,19 @@ public class JogControlsPanel extends JPanel {
             incrementsLabels.put(1, new JLabel("0.01 " + units.getShortName()));
             incrementsLabels.put(2, new JLabel("0.1 " + units.getShortName()));
             incrementsLabels.put(3, new JLabel("1.0 " + units.getShortName()));
-            incrementsLabels.put(4, new JLabel("10 " + units.getShortName()));
-            incrementsLabels.put(5, new JLabel("100 " + units.getShortName()));
+            incrementsLabels.put(4, new JLabel("4.0 " + units.getShortName()));
+            incrementsLabels.put(5, new JLabel("10 " + units.getShortName()));
+            incrementsLabels.put(6, new JLabel("100 " + units.getShortName()));
             sliderIncrements.setLabelTable(incrementsLabels);
         }
         else if (units == LengthUnit.Inches) {
             Hashtable<Integer, JLabel> incrementsLabels = new Hashtable<>();
-            incrementsLabels.put(1, new JLabel("0.001 " + units.getShortName()));
-            incrementsLabels.put(2, new JLabel("0.01 " + units.getShortName()));
-            incrementsLabels.put(3, new JLabel("0.1 " + units.getShortName()));
-            incrementsLabels.put(4, new JLabel("1.0 " + units.getShortName()));
-            incrementsLabels.put(5, new JLabel("10.0 " + units.getShortName()));
+            incrementsLabels.put(1, new JLabel("0.01 " + units.getShortName()));
+            incrementsLabels.put(2, new JLabel("0.1 " + units.getShortName()));
+            incrementsLabels.put(3, new JLabel("1.0 " + units.getShortName()));
+            incrementsLabels.put(4, new JLabel("4.0 " + units.getShortName()));
+            incrementsLabels.put(5, new JLabel("10 " + units.getShortName()));
+            incrementsLabels.put(6, new JLabel("100 " + units.getShortName()));
             sliderIncrements.setLabelTable(incrementsLabels);
         }
         else {
@@ -148,10 +157,21 @@ public class JogControlsPanel extends JPanel {
 
     public double getJogIncrement() {
         if (configuration.getSystemUnits() == LengthUnit.Millimeters) {
-            return 0.01 * Math.pow(10, sliderIncrements.getValue() - 1);
+        	if (sliderIncrements.getValue()>=1 && sliderIncrements.getValue()<=3 )
+        			return 0.01 * Math.pow(10, sliderIncrements.getValue() - 1);
+        	else if (sliderIncrements.getValue()==4 )
+        		return 4.0;
+        	else
+        		return 0.01 * Math.pow(10, sliderIncrements.getValue() - 2);
+            
         }
         else if (configuration.getSystemUnits() == LengthUnit.Inches) {
-            return 0.001 * Math.pow(10, sliderIncrements.getValue() - 1);
+        	if (sliderIncrements.getValue()>=1 && sliderIncrements.getValue()<=3 )
+    			return 0.01 * Math.pow(10, sliderIncrements.getValue() - 1);
+    	else if (sliderIncrements.getValue()==4 )
+    		return 4.0;
+    	else
+    		return 0.01 * Math.pow(10, sliderIncrements.getValue() - 2);
         }
         else {
             throw new Error(
@@ -166,6 +186,7 @@ public class JogControlsPanel extends JPanel {
     private void jog(final int x, final int y, final int z, final int c) {
         UiUtils.submitUiMachineTask(() -> {
             HeadMountable tool = machineControlsPanel.getSelectedTool();
+            
             Location l = tool.getLocation()
                              .convertToUnits(Configuration.get()
                                                           .getSystemUnits());
@@ -211,6 +232,8 @@ public class JogControlsPanel extends JPanel {
                 List<BoardLocation> boardLocations = machineControlsPanel.getJobPanel()
                                                                          .getJob()
                                                                          .getBoardLocations();
+                
+                
                 for (BoardLocation boardLocation : boardLocations) {
                     if (!boardLocation.isEnabled()) {
                         continue;
@@ -296,146 +319,190 @@ public class JogControlsPanel extends JPanel {
 
         JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
         add(tabbedPane_1);
-
-        JPanel panelControls = new JPanel();
-        tabbedPane_1.addTab("Jog", null, panelControls, null);
-        panelControls.setLayout(new FormLayout(
-                new ColumnSpec[] {FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-                        FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,},
-                new RowSpec[] {FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-                        FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,}));
-
-        JButton homeButton = new JButton(machineControlsPanel.homeAction);
-        // We set this Icon explicitly as a WindowBuilder helper. WindowBuilder can't find the
-        // homeAction referenced above so the icon doesn't render in the viewer. We set it here
-        // so the dialog looks right while editing.
-        homeButton.setIcon(Icons.home);
-        homeButton.setHideActionText(true);
-        panelControls.add(homeButton, "2, 2");
-
-        JLabel lblXy = new JLabel("X/Y");
-        lblXy.setFont(new Font("Lucida Grande", Font.PLAIN, 22));
-        lblXy.setHorizontalAlignment(SwingConstants.CENTER);
-        panelControls.add(lblXy, "8, 2, fill, default");
-
-        JLabel lblZ = new JLabel("Z");
-        lblZ.setHorizontalAlignment(SwingConstants.CENTER);
-        lblZ.setFont(new Font("Lucida Grande", Font.PLAIN, 22));
-        panelControls.add(lblZ, "14, 2");
-
-        JLabel lblDistance = new JLabel("Distance");
-        lblDistance.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
-        panelControls.add(lblDistance, "18, 2, center, center");
-
-        JLabel lblSpeed = new JLabel("Speed %");
-        lblSpeed.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
-        panelControls.add(lblSpeed, "20, 2, center, center");
-
-        sliderIncrements = new JSlider();
-        panelControls.add(sliderIncrements, "18, 3, 1, 10");
-        sliderIncrements.setOrientation(SwingConstants.VERTICAL);
-        sliderIncrements.setMajorTickSpacing(1);
-        sliderIncrements.setValue(1);
-        sliderIncrements.setSnapToTicks(true);
-        sliderIncrements.setPaintLabels(true);
-        sliderIncrements.setMinimum(1);
-        sliderIncrements.setMaximum(5);
-
-        JButton yPlusButton = new JButton(yPlusAction);
-        yPlusButton.setHideActionText(true);
-        panelControls.add(yPlusButton, "8, 4");
-
-        JButton zUpButton = new JButton(zPlusAction);
-        zUpButton.setHideActionText(true);
-        panelControls.add(zUpButton, "14, 4");
-
-        speedSlider = new JSlider();
-        speedSlider.setValue(100);
-        speedSlider.setPaintTicks(true);
-        speedSlider.setMinorTickSpacing(1);
-        speedSlider.setMajorTickSpacing(25);
-        speedSlider.setSnapToTicks(true);
-        speedSlider.setPaintLabels(true);
-        speedSlider.setOrientation(SwingConstants.VERTICAL);
-        panelControls.add(speedSlider, "20, 4, 1, 9");
-        speedSlider.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                Configuration.get()
-                             .getMachine()
-                             .setSpeed(speedSlider.getValue() * 0.01);
-            }
-        });
-
-        JButton positionNozzleBtn = new JButton(machineControlsPanel.targetToolAction);
-        positionNozzleBtn.setIcon(Icons.centerTool);
-        positionNozzleBtn.setHideActionText(true);
-        panelControls.add(positionNozzleBtn, "22, 4");
-
-        JButton buttonStartStop = new JButton(machineControlsPanel.startStopMachineAction);
-        buttonStartStop.setIcon(Icons.powerOn);
-        panelControls.add(buttonStartStop, "2, 6");
-        buttonStartStop.setHideActionText(true);
-
-        JButton xMinusButton = new JButton(xMinusAction);
-        xMinusButton.setHideActionText(true);
-        panelControls.add(xMinusButton, "6, 6");
-
-        JButton homeXyButton = new JButton(xyParkAction);
-        homeXyButton.setHideActionText(true);
-        panelControls.add(homeXyButton, "8, 6");
-
-        JButton xPlusButton = new JButton(xPlusAction);
-        xPlusButton.setHideActionText(true);
-        panelControls.add(xPlusButton, "10, 6");
-
-        JButton homeZButton = new JButton(zParkAction);
-        homeZButton.setHideActionText(true);
-        panelControls.add(homeZButton, "14, 6");
-
-        JButton yMinusButton = new JButton(yMinusAction);
-        yMinusButton.setHideActionText(true);
-        panelControls.add(yMinusButton, "8, 8");
-
-        JButton zDownButton = new JButton(zMinusAction);
-        zDownButton.setHideActionText(true);
-        panelControls.add(zDownButton, "14, 8");
-
-        JButton positionCameraBtn = new JButton(machineControlsPanel.targetCameraAction);
-        positionCameraBtn.setIcon(Icons.centerCamera);
-        positionCameraBtn.setHideActionText(true);
-        panelControls.add(positionCameraBtn, "22, 8");
-
-        JLabel lblC = new JLabel("C");
-        lblC.setHorizontalAlignment(SwingConstants.CENTER);
-        lblC.setFont(new Font("Lucida Grande", Font.PLAIN, 22));
-        panelControls.add(lblC, "4, 12");
-
-        JButton counterclockwiseButton = new JButton(cPlusAction);
-        counterclockwiseButton.setHideActionText(true);
-        panelControls.add(counterclockwiseButton, "6, 12");
-
-        JButton homeCButton = new JButton(cParkAction);
-        homeCButton.setHideActionText(true);
-        panelControls.add(homeCButton, "8, 12");
-
-        JButton clockwiseButton = new JButton(cMinusAction);
-        clockwiseButton.setHideActionText(true);
-        panelControls.add(clockwiseButton, "10, 12");
+        
+                JPanel panelControls = new JPanel();
+                tabbedPane_1.addTab("Jog", null, panelControls, null);
+                panelControls.setLayout(new FormLayout(new ColumnSpec[] {
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,
+                		FormSpecs.RELATED_GAP_COLSPEC,
+                		FormSpecs.DEFAULT_COLSPEC,},
+                	new RowSpec[] {
+                		FormSpecs.RELATED_GAP_ROWSPEC,
+                		FormSpecs.DEFAULT_ROWSPEC,
+                		FormSpecs.RELATED_GAP_ROWSPEC,
+                		FormSpecs.DEFAULT_ROWSPEC,
+                		FormSpecs.RELATED_GAP_ROWSPEC,
+                		FormSpecs.DEFAULT_ROWSPEC,
+                		FormSpecs.RELATED_GAP_ROWSPEC,
+                		FormSpecs.DEFAULT_ROWSPEC,
+                		FormSpecs.RELATED_GAP_ROWSPEC,
+                		FormSpecs.DEFAULT_ROWSPEC,
+                		FormSpecs.RELATED_GAP_ROWSPEC,
+                		FormSpecs.DEFAULT_ROWSPEC,}));
+                
+                        JButton homeButton = new JButton(machineControlsPanel.homeAction);
+                        // We set this Icon explicitly as a WindowBuilder helper. WindowBuilder can't find the
+                        // homeAction referenced above so the icon doesn't render in the viewer. We set it here
+                        // so the dialog looks right while editing.
+                        homeButton.setIcon(Icons.home);
+                        homeButton.setHideActionText(true);
+                        panelControls.add(homeButton, "2, 2");
+                        
+                        JButton btnTip_1 = new JButton("TIP 1");
+                        panelControls.add(btnTip_1, "6, 2");
+                        
+                        JButton btnTip = new JButton("TIP 2");
+                        panelControls.add(btnTip, "8, 2");
+                        
+                        JButton btnTip_2 = new JButton("TIP 3");
+                        panelControls.add(btnTip_2, "10, 2");
+                        
+                                JLabel lblZ = new JLabel("Z");
+                                lblZ.setHorizontalAlignment(SwingConstants.CENTER);
+                                lblZ.setFont(new Font("Lucida Grande", Font.PLAIN, 22));
+                                panelControls.add(lblZ, "14, 2");
+                                
+                                        JLabel lblDistance = new JLabel("Distance");
+                                        lblDistance.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+                                        panelControls.add(lblDistance, "18, 2, center, center");
+                                        
+                                                JLabel lblSpeed = new JLabel("Speed %");
+                                                lblSpeed.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+                                                panelControls.add(lblSpeed, "20, 2, center, center");
+                                                
+                                                        sliderIncrements = new JSlider();
+                                                        panelControls.add(sliderIncrements, "18, 3, 1, 10");
+                                                        sliderIncrements.setOrientation(SwingConstants.VERTICAL);
+                                                        sliderIncrements.setMajorTickSpacing(1);
+                                                        sliderIncrements.setValue(1);
+                                                        sliderIncrements.setSnapToTicks(true);
+                                                        sliderIncrements.setPaintLabels(true);
+                                                        sliderIncrements.setMinimum(1);
+                                                        sliderIncrements.setMaximum(6);
+                                                        
+                                                        JButton btnTip_3 = new JButton("TIP 4");
+                                                        panelControls.add(btnTip_3, "6, 4");
+                                                        
+                                                        JButton btnTip_4 = new JButton("TIP 5");
+                                                        panelControls.add(btnTip_4, "8, 4");
+                                                        
+                                                        JButton btnTip_5 = new JButton("TIP 6");
+                                                        panelControls.add(btnTip_5, "10, 4");
+                                                        
+                                                                JButton zUpButton = new JButton(zPlusAction);
+                                                                zUpButton.setHideActionText(true);
+                                                                panelControls.add(zUpButton, "14, 4");
+                                                                
+                                                                        speedSlider = new JSlider();
+                                                                        speedSlider.setValue(100);
+                                                                        speedSlider.setPaintTicks(true);
+                                                                        speedSlider.setMinorTickSpacing(1);
+                                                                        speedSlider.setMajorTickSpacing(25);
+                                                                        speedSlider.setSnapToTicks(true);
+                                                                        speedSlider.setPaintLabels(true);
+                                                                        speedSlider.setOrientation(SwingConstants.VERTICAL);
+                                                                        panelControls.add(speedSlider, "20, 4, 1, 9");
+                                                                        speedSlider.addChangeListener(new ChangeListener() {
+                                                                            @Override
+                                                                            public void stateChanged(ChangeEvent e) {
+                                                                                Configuration.get()
+                                                                                             .getMachine()
+                                                                                             .setSpeed(speedSlider.getValue() * 0.01);
+                                                                            }
+                                                                        });
+                                                                        
+                                                                                JButton positionNozzleBtn = new JButton(machineControlsPanel.targetToolAction);
+                                                                                positionNozzleBtn.setIcon(Icons.centerTool);
+                                                                                positionNozzleBtn.setHideActionText(true);
+                                                                                panelControls.add(positionNozzleBtn, "22, 4");
+                                                                                
+                                                                                        JButton buttonStartStop = new JButton(machineControlsPanel.startStopMachineAction);
+                                                                                        buttonStartStop.setIcon(Icons.powerOn);
+                                                                                        panelControls.add(buttonStartStop, "2, 6");
+                                                                                        buttonStartStop.setHideActionText(true);
+                                                                                        
+                                                                                                JButton yPlusButton = new JButton(yPlusAction);
+                                                                                                yPlusButton.setHideActionText(true);
+                                                                                                panelControls.add(yPlusButton, "8, 6");
+                                                                                                
+                                                                                                        JButton homeZButton = new JButton(zParkAction);
+                                                                                                        homeZButton.setHideActionText(true);
+                                                                                                        panelControls.add(homeZButton, "14, 6");
+                                                                                                        
+                                                                                                                JButton positionCameraBtn = new JButton(machineControlsPanel.targetCameraAction);
+                                                                                                                positionCameraBtn.setIcon(Icons.centerCamera);
+                                                                                                                positionCameraBtn.setHideActionText(true);
+                                                                                                                panelControls.add(positionCameraBtn, "22, 6");
+                                                                                                                
+                                                                                                                        JButton xMinusButton = new JButton(xMinusAction);
+                                                                                                                        xMinusButton.setHideActionText(true);
+                                                                                                                        panelControls.add(xMinusButton, "6, 8");
+                                                                                                                        
+                                                                                                                                JButton homeXyButton = new JButton(xyParkAction);
+                                                                                                                                homeXyButton.setHideActionText(true);
+                                                                                                                                panelControls.add(homeXyButton, "8, 8");
+                                                                                                                                
+                                                                                                                                        JButton xPlusButton = new JButton(xPlusAction);
+                                                                                                                                        xPlusButton.setHideActionText(true);
+                                                                                                                                        panelControls.add(xPlusButton, "10, 8");
+                                                                                                                                        
+                                                                                                                                                JButton zDownButton = new JButton(zMinusAction);
+                                                                                                                                                zDownButton.setHideActionText(true);
+                                                                                                                                                panelControls.add(zDownButton, "14, 8");
+                                                                                                                                                
+                                                                                                                                                JButton btnBot = new JButton(botAction);
+                                                                                                                                                panelControls.add(btnBot, "22, 8");
+                                                                                                                                                
+                                                                                                                                                JButton btnVacOn = new JButton(machineControlsPanel.vacOnAction);
+                                                                                                                                                panelControls.add(btnVacOn, "2, 10");
+                                                                                                                                                
+                                                                                                                                                        JButton yMinusButton = new JButton(yMinusAction);
+                                                                                                                                                        yMinusButton.setHideActionText(true);
+                                                                                                                                                        panelControls.add(yMinusButton, "8, 10");
+                                                                                                                                                        
+                                                                                                                                                        JButton btnVacOff = new JButton(machineControlsPanel.vacOffAction);
+                                                                                                                                                        panelControls.add(btnVacOff, "2, 12");
+                                                                                                                                                        
+                                                                                                                                                                JLabel lblC = new JLabel("C");
+                                                                                                                                                                lblC.setHorizontalAlignment(SwingConstants.CENTER);
+                                                                                                                                                                lblC.setFont(new Font("Lucida Grande", Font.PLAIN, 22));
+                                                                                                                                                                panelControls.add(lblC, "4, 12");
+                                                                                                                                                                
+                                                                                                                                                                        JButton counterclockwiseButton = new JButton(cPlusAction);
+                                                                                                                                                                        counterclockwiseButton.setHideActionText(true);
+                                                                                                                                                                        panelControls.add(counterclockwiseButton, "6, 12");
+                                                                                                                                                                        
+                                                                                                                                                                                JButton homeCButton = new JButton(cParkAction);
+                                                                                                                                                                                homeCButton.setHideActionText(true);
+                                                                                                                                                                                panelControls.add(homeCButton, "8, 12");
+                                                                                                                                                                                
+                                                                                                                                                                                        JButton clockwiseButton = new JButton(cMinusAction);
+                                                                                                                                                                                        clockwiseButton.setHideActionText(true);
+                                                                                                                                                                                        panelControls.add(clockwiseButton, "10, 12");
+                                                                                                                                                                                        
+                                                                                                                                                                                        JButton btnDump = new JButton(discardAction);
+                                                                                                                                                                                        panelControls.add(btnDump, "14, 12");
 
         JPanel panelSpecial = new JPanel();
         tabbedPane_1.addTab("Special", null, panelSpecial, null);
@@ -549,6 +616,23 @@ public class JogControlsPanel extends JPanel {
             jog(0, 0, -1, 0);
         }
     };
+    
+    @SuppressWarnings("serial")
+    public Action botAction = new AbstractAction("Bot-Cam") {
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+           
+
+        	
+        	            UiUtils.submitUiMachineTask(() -> {
+        	            	 Camera camera = VisionUtils.getBottomVisionCamera();
+        	            	    	                  Nozzle nozzle = machineControlsPanel.getSelectedNozzle();
+        	                MovableUtils.moveToLocationAtSafeZ(nozzle, camera.getLocation());
+        	            });
+        	     
+        	
+        }
+    }; 
 
     @SuppressWarnings("serial")
     public Action cPlusAction = new AbstractAction("C+", Icons.rotateCounterclockwise) {

@@ -261,6 +261,12 @@ public class ReferenceNozzle extends AbstractNozzle implements ReferenceHeadMoun
             double speed = getHead().getMachine().getSpeed();
             
             unloadNozzleTip();
+            Actuator actuator = getHead().getActuatorByName("TIP_RISER");
+			if (actuator!= null)
+			{
+				actuator.actuate(true);
+			}
+			
             Logger.debug("{}.loadNozzleTip({}): Start", getName(), nozzleTip.getName());
 
             Logger.debug("{}.loadNozzleTip({}): moveTo Start Location",
@@ -279,7 +285,10 @@ public class ReferenceNozzle extends AbstractNozzle implements ReferenceHeadMoun
                     new Object[] {getName(), nozzleTip.getName()});
             moveTo(nt.getChangerEndLocation(), nt.getChangerMid2ToEndSpeed() * speed);
             moveToSafeZ(getHead().getMachine().getSpeed());
-
+            if (actuator!= null)
+			{
+				actuator.actuate(false);
+			}
             Logger.debug("{}.loadNozzleTip({}): Finished",
                     new Object[] {getName(), nozzleTip.getName()});
         }
@@ -306,12 +315,21 @@ public class ReferenceNozzle extends AbstractNozzle implements ReferenceHeadMoun
         MovableUtils.moveToLocationAtSafeZ(this, nt.getChangerEndLocation(), speed);
 
         if (changerEnabled) {
+        	Actuator actuator = getHead().getActuatorByName("TIP_RISER");
+			if (actuator!= null)
+			{
+				actuator.actuate(true);
+			}
             Logger.debug("{}.unloadNozzleTip(): moveTo Mid Location 2", getName());
             moveTo(nt.getChangerMidLocation2(), nt.getChangerMid2ToEndSpeed() * speed);
 
             Logger.debug("{}.unloadNozzleTip(): moveTo Mid Location", getName());
             moveTo(nt.getChangerMidLocation(), nt.getChangerMidToMid2Speed() * speed);
-
+            if (actuator!= null)
+			{
+				actuator.actuate(false);
+			}
+            
             Logger.debug("{}.unloadNozzleTip(): moveTo Start Location", getName());
             moveTo(nt.getChangerStartLocation(), nt.getChangerStartToMidSpeed() * speed);
             moveToSafeZ(getHead().getMachine().getSpeed());

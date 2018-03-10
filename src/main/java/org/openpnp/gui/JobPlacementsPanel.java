@@ -53,6 +53,7 @@ import org.openpnp.model.Part;
 import org.openpnp.model.Placement;
 import org.openpnp.model.Placement.Type;
 import org.openpnp.spi.Camera;
+import org.openpnp.spi.Feeder;
 import org.openpnp.spi.HeadMountable;
 import org.openpnp.spi.Nozzle;
 import org.openpnp.spi.PnpJobProcessor;
@@ -60,6 +61,8 @@ import org.openpnp.spi.PnpJobProcessor.JobPlacement;
 import org.openpnp.util.MovableUtils;
 import org.openpnp.util.UiUtils;
 import org.openpnp.util.Utils2D;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 
 public class JobPlacementsPanel extends JPanel {
     private JTable table;
@@ -116,31 +119,39 @@ public class JobPlacementsPanel extends JPanel {
         btnRemovePlacement.setHideActionText(true);
         toolBarPlacements.add(btnRemovePlacement);
         toolBarPlacements.addSeparator();
-        JButton btnCaptureCameraPlacementLocation = new JButton(captureCameraPlacementLocation);
-        btnCaptureCameraPlacementLocation.setHideActionText(true);
-        toolBarPlacements.add(btnCaptureCameraPlacementLocation);
-
-        JButton btnCaptureToolPlacementLocation = new JButton(captureToolPlacementLocation);
-        btnCaptureToolPlacementLocation.setHideActionText(true);
-        toolBarPlacements.add(btnCaptureToolPlacementLocation);
 
         JButton btnPositionCameraPositionLocation = new JButton(moveCameraToPlacementLocation);
         btnPositionCameraPositionLocation.setHideActionText(true);
         toolBarPlacements.add(btnPositionCameraPositionLocation);
-        JButton btnPositionCameraPositionNextLocation =
-                new JButton(moveCameraToPlacementLocationNext);
+        
+        JButton btnPositionCameraPositionNextLocation = new JButton(moveCameraToPlacementLocationNext);
         btnPositionCameraPositionNextLocation.setHideActionText(true);
         toolBarPlacements.add(btnPositionCameraPositionNextLocation);
 
         JButton btnPositionToolPositionLocation = new JButton(moveToolToPlacementLocation);
         btnPositionToolPositionLocation.setHideActionText(true);
         toolBarPlacements.add(btnPositionToolPositionLocation);
-
-        toolBarPlacements.addSeparator();
+        
+        JButton btnPositionToolPickLocation = new JButton(moveToolToPickLocation);
+        btnPositionToolPickLocation.setHideActionText(true);
+        toolBarPlacements.add(btnPositionToolPickLocation);
+        
+                toolBarPlacements.addSeparator();
 
         JButton btnEditFeeder = new JButton(editPlacementFeederAction);
         btnEditFeeder.setHideActionText(true);
         toolBarPlacements.add(btnEditFeeder);
+                
+                JSeparator separator = new JSeparator();
+                separator.setOrientation(SwingConstants.VERTICAL);
+                toolBarPlacements.add(separator);
+        
+                JButton btnCaptureToolPlacementLocation = new JButton(captureToolPlacementLocation);
+                btnCaptureToolPlacementLocation.setHideActionText(true);
+                toolBarPlacements.add(btnCaptureToolPlacementLocation);
+                JButton btnCaptureCameraPlacementLocation = new JButton(captureCameraPlacementLocation);
+                btnCaptureCameraPlacementLocation.setHideActionText(true);
+                toolBarPlacements.add(btnCaptureCameraPlacementLocation);
 
         tableModel = new PlacementsTableModel(configuration);
 
@@ -405,7 +416,63 @@ public class JobPlacementsPanel extends JPanel {
             });
         }
     };
+    
+   
+    
+    
+    
+    public final Action moveToolToPickLocation = new AbstractAction() {
+        {
+            putValue(SMALL_ICON, Icons.centerCameraOnFeeder);
+            putValue(NAME, "Move Camera To Part Pick Location");
+            putValue(SHORT_DESCRIPTION, "Position the camera at the part's pick location.");
+        }
 
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+        	
+        	try {
+        	Camera camera = MainFrame.get().getMachineControls().getSelectedTool().getHead().getDefaultCamera();
+               
+                 		 Part part = getSelection().getPart();
+                 Feeder feeder = null;
+                 // find a feeder to feed
+                 for (Feeder f : Configuration.get().getMachine().getFeeders()) {
+                     if (f.getPart() == part && f.isEnabled()) {
+                         feeder = f;
+                         
+                     }
+                 }
+                 if (feeder == null) {
+                     throw new Exception("No valid feeder found for " + part.getId());
+                 }
+                 else
+                 {
+                	 Location pickLocation;
+					
+						pickLocation = feeder.getPickLocation();
+						 UiUtils.submitUiMachineTask(() -> {
+		                     MovableUtils.moveToLocationAtSafeZ(camera, pickLocation);
+		                     });
+					
+                    
+                	 
+                 }
+                 // feed the chosen feeder
+                
+                 // pick the part
+                
+        	} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	
+        	
+        	
+        	
+          
+        }
+    };
     public final Action captureCameraPlacementLocation = new AbstractAction() {
         {
             putValue(SMALL_ICON, Icons.captureCamera);

@@ -43,6 +43,7 @@ import org.openpnp.util.Utils2D;
 import org.openpnp.util.VisionUtils;
 import org.openpnp.vision.pipeline.CvPipeline;
 import org.openpnp.vision.pipeline.CvStage;
+import org.pmw.tinylog.Logger;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 
@@ -115,6 +116,7 @@ public class ReferenceStripFeeder extends ReferenceFeeder {
     private Length referenceHoleToPartLinear = new Length(2, LengthUnit.Millimeters);
 
     private Location visionOffsets;
+    private Location firstVisionOffsets;
     private Location visionLocation;
 
     public Length getHoleDiameterMin() {
@@ -214,12 +216,27 @@ public class ReferenceStripFeeder extends ReferenceFeeder {
         setFeedCount(getFeedCount() + 1);
 
         updateVisionOffsets(nozzle);
+        if (visionOffsets!=null) 
+        	{
+        	Logger.debug("Vision offsets {} {}",visionOffsets.getX(),visionOffsets.getY());
+        	}
+        else
+        {
+        	Logger.debug("Vision offsets null");
+        }
     }
 
     private void updateVisionOffsets(Nozzle nozzle) throws Exception {
-        if (!visionEnabled) {
+        if (!visionEnabled ) {
             return;
         }
+        
+        if( feedCount>1)
+        {      	
+        	visionOffsets=firstVisionOffsets;
+        	return;
+        }
+       
         // go to where we expect to find the next reference hole
         Camera camera = nozzle.getHead().getDefaultCamera();
         Location expectedLocation = null;
@@ -254,6 +271,7 @@ public class ReferenceStripFeeder extends ReferenceFeeder {
         }
         visionOffsets = actualLocation.subtract(expectedLocation).derive(null, null, 0d, 0d);
         visionLocation = actualLocation;
+        firstVisionOffsets=visionOffsets;
     }
 
     private Location findClosestHole(Camera camera) throws Exception {

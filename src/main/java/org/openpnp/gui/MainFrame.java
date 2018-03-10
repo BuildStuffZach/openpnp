@@ -240,7 +240,8 @@ public class MainFrame extends JFrame {
         mnImport = new JMenu("Import Board");
         mnImport.setMnemonic(KeyEvent.VK_I);
         mnFile.add(mnImport);
-
+        mnFile.addSeparator();
+        mnFile.add(new JMenuItem(saveSettingsAction));
 
         if (!macOsXMenus) {
             mnFile.addSeparator();
@@ -816,6 +817,36 @@ public class MainFrame extends JFrame {
         }
     };
 
+    
+    private Action saveSettingsAction = new AbstractAction("Save Settings") {
+       
+
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+        	 try {
+        	        configuration.save();
+        	        MessageBoxes.infoBox("Success","Settings Saved");
+        	    }
+        	    catch (Exception e) {
+        	        String message = "There was a problem saving the configuration. The reason was:\n\n"
+        	                + e.getMessage() + "\n\nDo you want to quit without saving?";
+        	        message = message.replaceAll("\n", "<br/>");
+        	        message = message.replaceAll("\r", "");
+        	        message = "<html><body width=\"400\">" + message + "</body></html>";
+        	        MessageBoxes.infoBox("Error",message);
+        	      
+        	    }
+        	
+        	
+        }
+    };
+    
+    
+   
+    
+    
+    
+    
     private Action quitAction = new AbstractAction("Exit") {
         {
             putValue(MNEMONIC_KEY, KeyEvent.VK_X);

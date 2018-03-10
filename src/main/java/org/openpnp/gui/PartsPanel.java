@@ -331,6 +331,7 @@ public class PartsPanel extends JPanel implements WizardContainer {
 
         @Override
         public void actionPerformed(ActionEvent arg0) {
+        	
             UiUtils.submitUiMachineTask(() -> {
                 Nozzle nozzle = MainFrame.get().getMachineControls().getSelectedNozzle();
                 Part part = getSelection();

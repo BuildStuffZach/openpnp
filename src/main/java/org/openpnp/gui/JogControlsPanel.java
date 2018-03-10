@@ -673,6 +673,7 @@ public class JogControlsPanel extends JPanel {
             park(false, false, true);
         }
     };
+    
 
     @SuppressWarnings("serial")
     public Action safezAction = new AbstractAction("Head Safe Z") {

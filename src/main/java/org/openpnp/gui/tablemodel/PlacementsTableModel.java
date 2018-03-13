@@ -57,7 +57,9 @@ public class PlacementsTableModel extends AbstractTableModel {
         Ready,
         MissingPart,
         MissingFeeder,
-        ZeroPartHeight
+        ZeroPartHeight,
+        MissingNozzleTip
+        
     }
     
    
@@ -193,6 +195,10 @@ public class PlacementsTableModel extends AbstractTableModel {
 
             if (placement.getPart().getHeight().getValue() == 0) {
                 return Status.ZeroPartHeight;
+            }
+            
+            if (placement.getPart().getNozzleTip(placement.getPart())== NozzleTipSelect.None) {
+                return Status.MissingNozzleTip;
             }
         }
         return Status.Ready;

@@ -164,6 +164,7 @@ public class Part extends AbstractModelObject implements Identifiable {
  	            	else
  	            	{
  	            		//remove Compatable
+ 	            		nozzleTip.removeCompatiblePackage(packag);
  	            	}
  	             }
  			 }

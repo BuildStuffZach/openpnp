@@ -163,6 +163,11 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
     public void setCompatiblePackage(org.openpnp.model.Package compatiblePackage) {
     	compatiblePackageIds.add(compatiblePackage.getId());
     }
+    
+    public void removeCompatiblePackage(org.openpnp.model.Package compatiblePackage) {
+    	compatiblePackageIds.remove(compatiblePackage.getId());
+    }
+    
 
     @Override
     public String toString() {

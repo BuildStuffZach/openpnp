@@ -12,4 +12,5 @@ import org.openpnp.model.Part;
 public interface NozzleTip extends Identifiable, Named, WizardConfigurable, PropertySheetHolder {
     public boolean canHandle(Part part);
     public void setCompatiblePackage(org.openpnp.model.Package compatiblePackage);
+    public void removeCompatiblePackage(org.openpnp.model.Package compatiblePackage);
 }

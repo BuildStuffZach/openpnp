@@ -34,7 +34,8 @@ import org.simpleframework.xml.core.Persist;
  * @author jason
  */
 public class Placement extends AbstractModelObject implements Identifiable {
-    public enum Type {
+   
+	public enum Type {
         Place, Fiducial, Ignore
     }
 

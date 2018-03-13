@@ -31,18 +31,26 @@ import org.openpnp.model.Configuration;
 import org.openpnp.model.Length;
 import org.openpnp.model.Location;
 import org.openpnp.model.Part;
+import org.openpnp.model.Part.NozzleTipSelect;
 import org.openpnp.model.Placement;
 import org.openpnp.model.Placement.Type;
 import org.openpnp.spi.Feeder;
+import org.openpnp.spi.Nozzle;
+
+import org.openpnp.spi.Head;
+import org.openpnp.spi.Machine;
+import org.openpnp.spi.PnpJobProcessor.JobPlacement;
+
 
 public class PlacementsTableModel extends AbstractTableModel {
     final Configuration configuration;
 
     private String[] columnNames =
-            new String[] {"ID", "Part", "Side", "X", "Y", "Rot.", "Type", "Placed", "Status", "Check Fids","Height"};
+            new String[] {"ID", "Part", "Side", "Nozzle Tip",  "Rot.", "Type", "Placed", "Status", "Check Fids","Height"};
 
     private Class[] columnTypes = new Class[] {PartCellValue.class, Part.class, Side.class,
-            LengthCellValue.class, LengthCellValue.class, RotationCellValue.class, Type.class,
+    		NozzleTipSelect.class, 
+            RotationCellValue.class, Type.class,
             Boolean.class, Status.class, Boolean.class, LengthCellValue.class};
 
     public enum Status {
@@ -51,6 +59,8 @@ public class PlacementsTableModel extends AbstractTableModel {
         MissingFeeder,
         ZeroPartHeight
     }
+    
+   
 
     private Board board;
     private BoardLocation boardLocation;
@@ -110,15 +120,11 @@ public class PlacementsTableModel extends AbstractTableModel {
                 placement.setSide((Side) aValue);
             }
             else if (columnIndex == 3) {
-                LengthCellValue value = (LengthCellValue) aValue;
-                value.setDisplayNativeUnits(true);
-                Length length = value.getLength();
-                Location location = placement.getLocation();
-                location = Length.setLocationField(configuration, location, length, Length.Field.X,
-                        true);
-                placement.setLocation(location);
+            	placement.getPart().setNozzleTip((NozzleTipSelect)aValue, placement.getPart().getPackage());
+                fireTableDataChanged();
+                
             }
-            else if (columnIndex == 4) {
+        /*    else if (columnIndex == 4) {
                 LengthCellValue value = (LengthCellValue) aValue;
                 value.setDisplayNativeUnits(true);
                 Length length = value.getLength();
@@ -127,22 +133,23 @@ public class PlacementsTableModel extends AbstractTableModel {
                         true);
                 placement.setLocation(location);
             }
-            else if (columnIndex == 5) {
+            */
+            else if (columnIndex == 4) {
                 placement.setLocation(placement.getLocation().derive(null, null, null,
                         Double.parseDouble(aValue.toString())));
             }
-            else if (columnIndex == 6) {
+            else if (columnIndex == 5) {
                 placement.setType((Type) aValue);
                 fireTableCellUpdated(rowIndex, 8);
             }
-            else if (columnIndex == 7) {
+            else if (columnIndex == 6) {
                 //placement.setPlaced((Boolean) aValue);
             	boardLocation.setPlaced(placement.getId(), (Boolean) aValue);
             }
-            else if (columnIndex == 9) {
+            else if (columnIndex == 8) {
                 placement.setCheckFids((Boolean) aValue);
             }
-            else if (columnIndex == 10) {
+            else if (columnIndex == 9) {
                 LengthCellValue value = (LengthCellValue) aValue;
                 value.setDisplayNativeUnits(true);
                 Length length = value.getLength();
@@ -164,6 +171,8 @@ public class PlacementsTableModel extends AbstractTableModel {
         }
     }
 
+   
+    
     // TODO: Ideally this would all come from the JobPlanner, but this is a
     // good start for now.
     private Status getPlacementStatus(Placement placement) {
@@ -200,22 +209,22 @@ public class PlacementsTableModel extends AbstractTableModel {
             case 2:
                 return placement.getSide();
             case 3:
-                return new LengthCellValue(loc.getLengthX(), true);
+            	return placement.getPart().getNozzleTip(placement.getPart());
+            //case 4:
+             //   return new LengthCellValue(loc.getLengthY(), true);
             case 4:
-                return new LengthCellValue(loc.getLengthY(), true);
-            case 5:
                 // return String.format(Locale.US, configuration.getLengthDisplayFormat(),
                 // loc.getRotation());
                 return new RotationCellValue(loc.getRotation(), true);
-            case 6:
+            case 5:
                 return placement.getType();
-            case 7:
+            case 6:
             	return boardLocation.getPlaced(placement.getId());
-            case 8:
+            case 7:
                 return getPlacementStatus(placement);
-            case 9:
+            case 8:
                 return placement.getCheckFids();
-            case 10:
+            case 9:
             	return placement.getPart().getHeight().getValue();
             default:
                 return null;

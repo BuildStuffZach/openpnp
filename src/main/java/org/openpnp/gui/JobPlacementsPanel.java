@@ -50,6 +50,7 @@ import org.openpnp.model.BoardLocation;
 import org.openpnp.model.Configuration;
 import org.openpnp.model.Location;
 import org.openpnp.model.Part;
+import org.openpnp.model.Part.NozzleTipSelect;
 import org.openpnp.model.Placement;
 import org.openpnp.model.Placement.Type;
 import org.openpnp.spi.Camera;
@@ -91,10 +92,10 @@ public class JobPlacementsPanel extends JPanel {
         boardLocationSelectionActionGroup.setEnabled(false);
 
         singleSelectionActionGroup =
-                new ActionGroup(removeAction, editPlacementFeederAction, setTypeAction, setSideAction, setPlacedAction);
+                new ActionGroup(removeAction, editPlacementFeederAction, setTypeAction, setSideAction, setPlacedAction, setNozzleTipAction);
         singleSelectionActionGroup.setEnabled(false);
 
-        multiSelectionActionGroup = new ActionGroup(removeAction, setTypeAction, setSideAction, setPlacedAction);
+        multiSelectionActionGroup = new ActionGroup(removeAction, setTypeAction, setSideAction, setPlacedAction, setNozzleTipAction);
         multiSelectionActionGroup.setEnabled(false);
 
         captureAndPositionActionGroup = new ActionGroup(captureCameraPlacementLocation,
@@ -106,7 +107,8 @@ public class JobPlacementsPanel extends JPanel {
         partsComboBox.setRenderer(new IdentifiableListCellRenderer<Part>());
         JComboBox<Side> sidesComboBox = new JComboBox(Side.values());
         JComboBox<Type> typesComboBox = new JComboBox(Type.values());
-
+        JComboBox<Type> nozzleTipsComboBox = new JComboBox(NozzleTipSelect.values());
+        
         setLayout(new BorderLayout(0, 0));
         JToolBar toolBarPlacements = new JToolBar();
         add(toolBarPlacements, BorderLayout.NORTH);
@@ -162,6 +164,7 @@ public class JobPlacementsPanel extends JPanel {
         table.setDefaultEditor(Side.class, new DefaultCellEditor(sidesComboBox));
         table.setDefaultEditor(Part.class, new DefaultCellEditor(partsComboBox));
         table.setDefaultEditor(Type.class, new DefaultCellEditor(typesComboBox));
+        table.setDefaultEditor(NozzleTipSelect.class, new DefaultCellEditor(nozzleTipsComboBox));
         table.setDefaultRenderer(Part.class, new IdentifiableTableCellRenderer<Part>());
         table.setDefaultRenderer(PlacementsTableModel.Status.class, new StatusRenderer());
         table.setDefaultRenderer(Placement.Type.class, new TypeRenderer());
@@ -238,6 +241,14 @@ public class JobPlacementsPanel extends JPanel {
         setPlacedMenu.add(new SetPlacedAction(true));
         setPlacedMenu.add(new SetPlacedAction(false));
         popupMenu.add(setPlacedMenu);
+        
+        JMenu setNozzleMenu = new JMenu(setNozzleTipAction);
+        for (Part.NozzleTipSelect nozzleTip : Part.NozzleTipSelect.values()) {
+        	setNozzleMenu.add(new setNozzleTipAction(nozzleTip));
+        }
+        popupMenu.add(setNozzleMenu);
+        
+        
 
         table.setComponentPopupMenu(popupMenu);
 
@@ -526,6 +537,34 @@ public class JobPlacementsPanel extends JPanel {
         }
     };
 
+    public final Action setNozzleTipAction = new AbstractAction() {
+        {
+            putValue(NAME, "Set Nozzle Tip");
+            putValue(SHORT_DESCRIPTION, "Set Nozzle Tip to...");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent arg0) {}
+    };
+    
+    class setNozzleTipAction extends AbstractAction {
+        final Part.NozzleTipSelect nozzleTip;
+
+        public setNozzleTipAction(Part.NozzleTipSelect nozzleTip) {
+            this.nozzleTip = nozzleTip;
+            putValue(NAME, nozzleTip.toString());
+            putValue(SHORT_DESCRIPTION, "Set nozzle tip to " + nozzleTip.toString());
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            for (Placement placement : getSelections()) {
+                placement.getPart().setNozzleTip(nozzleTip,placement.getPart().getPackage());
+                tableModel.fireTableDataChanged();
+            }
+        }
+    };
+    
     public final Action setTypeAction = new AbstractAction() {
         {
             putValue(NAME, "Set Type");
@@ -536,6 +575,7 @@ public class JobPlacementsPanel extends JPanel {
         public void actionPerformed(ActionEvent arg0) {}
     };
 
+ 
     class SetTypeAction extends AbstractAction {
         final Placement.Type type;
 

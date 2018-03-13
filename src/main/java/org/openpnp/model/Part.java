@@ -19,7 +19,15 @@
 
 package org.openpnp.model;
 
+import javax.swing.table.TableModel;
+
 import org.openpnp.ConfigurationListener;
+import org.openpnp.model.Part.NozzleTipSelect;
+import org.openpnp.model.Placement.Type;
+import org.openpnp.spi.Head;
+import org.openpnp.spi.Machine;
+import org.openpnp.spi.Nozzle;
+import org.openpnp.spi.NozzleTip;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.core.Persist;
 
@@ -29,6 +37,17 @@ import org.simpleframework.xml.core.Persist;
  * many boards and should generally represent a single part in the real world.
  */
 public class Part extends AbstractModelObject implements Identifiable {
+	
+	public enum NozzleTipSelect {
+        TIP1,
+        TIP2,
+        TIP3,
+        TIP4,
+        TIP5,
+        TIP6,
+        None
+    }
+	
     @Attribute
     private String id;
     @Attribute(required = false)
@@ -46,7 +65,9 @@ public class Part extends AbstractModelObject implements Identifiable {
 
     @Attribute(required = false)
     private double speed = 1.0;
-
+    
+    private NozzleTipSelect nozzleTip;
+    
 
     @SuppressWarnings("unused")
     private Part() {
@@ -122,6 +143,79 @@ public class Part extends AbstractModelObject implements Identifiable {
         firePropertyChange("package", oldValue, packag);
     }
 
+    public void setNozzleTip(NozzleTipSelect tip, Package packag) {
+    	 Machine machine=Configuration.get().getMachine();
+     	Head head;
+ 		try {
+ 			head = machine.getDefaultHead();
+ 			 for (int i = 0; i < head.getNozzles().size(); i++) {
+ 	             Nozzle nozzle = head.getNozzles().get(i);
+ 	             for (int j=0;j < nozzle.getNozzleTips().size();j++)
+ 	             {
+ 	            	 NozzleTip nozzleTip= nozzle.getNozzleTips().get(j);
+ 			
+ 	            	if (nozzleTip.getName().equals(tip.name()))
+ 	            	{
+ 	            	 	
+ 	            		nozzleTip.setCompatiblePackage(packag);
+ 	            		//nozzleTip.getConfigurationWizard().
+ 	            		
+ 	            	}
+ 	            	else
+ 	            	{
+ 	            		//remove Compatable
+ 	            	}
+ 	             }
+ 			 }
+        
+ 		} catch (Exception e) {
+			
+			e.printStackTrace();
+			
+		}
+ 		//firePropertyChange("height", oldValue, getHeight());
+    }
+    
+    public NozzleTipSelect getNozzleTip(Part part)
+    {
+    	  Machine machine=Configuration.get().getMachine();;
+
+    	  
+    	Head head;
+		try {
+			head = machine.getDefaultHead();
+		
+    	 for (int i = 0; i < head.getNozzles().size(); i++) {
+             Nozzle nozzle = head.getNozzles().get(i);
+             for (int j=0;j < nozzle.getNozzleTips().size();j++)
+             {
+            	 org.openpnp.spi.NozzleTip nozzleTip= nozzle.getNozzleTips().get(j);
+             
+            	 if (nozzleTip.canHandle(part))
+            	 {
+            		 
+            		 //this is a hack for now... eventually it should read the list of configured tips.
+            	 	switch (j)
+             		{
+             		case 0: 	return NozzleTipSelect.TIP1;
+             		case 1: 	return NozzleTipSelect.TIP2;
+             		case 2: 	return NozzleTipSelect.TIP3;
+             		case 3: 	return NozzleTipSelect.TIP4;
+             		case 4: 	return NozzleTipSelect.TIP5;
+             		case 5: 	return NozzleTipSelect.TIP6;
+             		}
+             	}
+             }
+    	 }
+    	 return  NozzleTipSelect.None;
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+			return  NozzleTipSelect.None;
+		}
+    }
+    
+    
     @Override
     public String toString() {
         return String.format("id %s, name %s, heightUnits %s, height %f, packageId (%s)", id, name,

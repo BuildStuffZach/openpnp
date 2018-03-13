@@ -145,6 +145,7 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
         // Logger.debug("{}.canHandle({}) => {}", getName(), part.getId(), result);
         return result;
     }
+    
 
     public Set<org.openpnp.model.Package> getCompatiblePackages() {
         return new HashSet<>(compatiblePackages);
@@ -157,6 +158,10 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
         for (org.openpnp.model.Package pkg : compatiblePackages) {
             compatiblePackageIds.add(pkg.getId());
         }
+    }
+    
+    public void setCompatiblePackage(org.openpnp.model.Package compatiblePackage) {
+    	compatiblePackageIds.add(compatiblePackage.getId());
     }
 
     @Override

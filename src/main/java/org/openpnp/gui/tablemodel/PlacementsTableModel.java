@@ -31,7 +31,7 @@ import org.openpnp.model.Configuration;
 import org.openpnp.model.Length;
 import org.openpnp.model.Location;
 import org.openpnp.model.Part;
-import org.openpnp.model.Part.NozzleTipSelect;
+import org.openpnp.model.Package.NozzleTipSelect;
 import org.openpnp.model.Placement;
 import org.openpnp.model.Placement.Type;
 import org.openpnp.spi.Feeder;
@@ -122,7 +122,7 @@ public class PlacementsTableModel extends AbstractTableModel {
                 placement.setSide((Side) aValue);
             }
             else if (columnIndex == 3) {
-            	placement.getPart().setNozzleTip((NozzleTipSelect)aValue, placement.getPart().getPackage());
+            	placement.getPart().getPackage().setNozzleTip((org.openpnp.model.Package.NozzleTipSelect) aValue, placement.getPart().getPackage());
                 fireTableDataChanged();
                 
             }
@@ -197,7 +197,7 @@ public class PlacementsTableModel extends AbstractTableModel {
                 return Status.ZeroPartHeight;
             }
             
-            if (placement.getPart().getNozzleTip(placement.getPart())== NozzleTipSelect.None) {
+            if (placement.getPart().getPackage().getNozzleTip(placement.getPart())== org.openpnp.model.Package.NozzleTipSelect.None) {
                 return Status.MissingNozzleTip;
             }
         }
@@ -215,7 +215,7 @@ public class PlacementsTableModel extends AbstractTableModel {
             case 2:
                 return placement.getSide();
             case 3:
-            	return placement.getPart().getNozzleTip(placement.getPart());
+            	return placement.getPart().getPackage().getNozzleTip(placement.getPart());
             //case 4:
              //   return new LengthCellValue(loc.getLengthY(), true);
             case 4:

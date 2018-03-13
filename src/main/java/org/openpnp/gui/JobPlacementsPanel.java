@@ -50,7 +50,8 @@ import org.openpnp.model.BoardLocation;
 import org.openpnp.model.Configuration;
 import org.openpnp.model.Location;
 import org.openpnp.model.Part;
-import org.openpnp.model.Part.NozzleTipSelect;
+import org.openpnp.model.Package;
+import org.openpnp.model.Package.NozzleTipSelect;
 import org.openpnp.model.Placement;
 import org.openpnp.model.Placement.Type;
 import org.openpnp.spi.Camera;
@@ -243,7 +244,7 @@ public class JobPlacementsPanel extends JPanel {
         popupMenu.add(setPlacedMenu);
         
         JMenu setNozzleMenu = new JMenu(setNozzleTipAction);
-        for (Part.NozzleTipSelect nozzleTip : Part.NozzleTipSelect.values()) {
+        for (Package.NozzleTipSelect nozzleTip : Package.NozzleTipSelect.values()) {
         	setNozzleMenu.add(new setNozzleTipAction(nozzleTip));
         }
         popupMenu.add(setNozzleMenu);
@@ -548,9 +549,9 @@ public class JobPlacementsPanel extends JPanel {
     };
     
     class setNozzleTipAction extends AbstractAction {
-        final Part.NozzleTipSelect nozzleTip;
+        final Package.NozzleTipSelect nozzleTip;
 
-        public setNozzleTipAction(Part.NozzleTipSelect nozzleTip) {
+        public setNozzleTipAction(Package.NozzleTipSelect nozzleTip) {
             this.nozzleTip = nozzleTip;
             putValue(NAME, nozzleTip.toString());
             putValue(SHORT_DESCRIPTION, "Set nozzle tip to " + nozzleTip.toString());
@@ -559,7 +560,7 @@ public class JobPlacementsPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent arg0) {
             for (Placement placement : getSelections()) {
-                placement.getPart().setNozzleTip(nozzleTip,placement.getPart().getPackage());
+                placement.getPart().getPackage().setNozzleTip(nozzleTip,placement.getPart().getPackage());
                 tableModel.fireTableDataChanged();
             }
         }

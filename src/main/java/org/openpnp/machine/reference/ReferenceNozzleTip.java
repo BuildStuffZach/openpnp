@@ -161,11 +161,17 @@ public class ReferenceNozzleTip extends AbstractNozzleTip {
     }
     
     public void setCompatiblePackage(org.openpnp.model.Package compatiblePackage) {
+    	
     	compatiblePackageIds.add(compatiblePackage.getId());
+    	compatiblePackages.add(compatiblePackage);
+    	 
     }
     
     public void removeCompatiblePackage(org.openpnp.model.Package compatiblePackage) {
+    	
     	compatiblePackageIds.remove(compatiblePackage.getId());
+    	 compatiblePackages.remove(compatiblePackage);
+    	
     }
     
 

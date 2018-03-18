@@ -136,14 +136,35 @@ public class ReferenceNozzle extends AbstractNozzle implements ReferenceHeadMoun
             throw new Exception("Can't pick, no nozzle tip loaded");
         }
         this.part = part;
-        getDriver().pick(this);
+        getDriver().pick(this);  //turns on vac
         getMachine().fireMachineHeadActivity(head);
         Thread.sleep(pickDwellMilliseconds);
 
         Actuator actuator = getHead().getActuatorByName(vacuumSenseActuatorName);
         if (actuator != null) {
             ReferenceNozzleTip nt = getNozzleTip();
-            double vacuumLevel = Double.parseDouble(actuator.read());
+            double vacuumLevel;// = Double.parseDouble(actuator.read());
+            //////////////////////////////
+            int times=6;
+            while(times-->0) {
+            vacuumLevel = Double.parseDouble(actuator.read());
+            if (invertVacuumSenseLogic) {
+                if (vacuumLevel > nt.getVacuumLevelPartOn()) {
+                    Thread.sleep(20); 
+				}
+				else { break; }
+            }
+		else {
+                if (vacuumLevel < nt.getVacuumLevelPartOn()) {
+                    Thread.sleep(20); 
+				}
+		         else { break; }
+			}
+        };
+           ////////////////////////////////////// 
+            
+            
+            vacuumLevel = Double.parseDouble(actuator.read());
             if (invertVacuumSenseLogic) {
                 if (vacuumLevel > nt.getVacuumLevelPartOn()) {
                     throw new Exception(String.format(

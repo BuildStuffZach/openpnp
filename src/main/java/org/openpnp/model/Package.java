@@ -137,16 +137,17 @@ public class Package extends AbstractModelObject implements Identifiable {
    
    public NozzleTipSelect getNozzleTip(Part part)
    {
-   	  Machine machine=Configuration.get().getMachine();;
-
+   	 
+	   Machine machine=Configuration.get().getMachine();
    	  
    	Head head;
 		try {
+			
 			head = machine.getDefaultHead();
 		
    	 for (int i = 0; i < head.getNozzles().size(); i++) {
             Nozzle nozzle = head.getNozzles().get(i);
-            for (int j=0;j < nozzle.getNozzleTips().size();j++)
+            for (int j=0; j < nozzle.getNozzleTips().size(); j++)
             {
            	 org.openpnp.spi.NozzleTip nozzleTip= nozzle.getNozzleTips().get(j);
             

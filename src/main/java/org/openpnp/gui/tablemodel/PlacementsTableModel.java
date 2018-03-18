@@ -215,6 +215,9 @@ public class PlacementsTableModel extends AbstractTableModel {
             case 2:
                 return placement.getSide();
             case 3:
+            	if (placement.getPart()==null) return null;
+            	if (placement.getPart().getPackage()==null) return null;
+            	
             	return placement.getPart().getPackage().getNozzleTip(placement.getPart());
             //case 4:
              //   return new LengthCellValue(loc.getLengthY(), true);
@@ -231,6 +234,8 @@ public class PlacementsTableModel extends AbstractTableModel {
             case 8:
                 return placement.getCheckFids();
             case 9:
+            	if (placement.getPart()==null) return null;
+            	if (placement.getPart().getHeight()==null) return null;
             	return placement.getPart().getHeight().getValue();
             default:
                 return null;

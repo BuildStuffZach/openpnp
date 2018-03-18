@@ -33,7 +33,7 @@ import org.openpnp.util.BeanUtils;
 public class FeedersTableModel extends AbstractTableModel {
     final private Configuration configuration;
 
-    private String[] columnNames = new String[] {"Name", "Type", "Part", "Enabled"};
+    private String[] columnNames = new String[] {"Name", "Type", "Part", "Enabled","Nozzle_Tip"};
     private List<Feeder> feeders;
 
     public FeedersTableModel(Configuration configuration) {
@@ -114,6 +114,11 @@ public class FeedersTableModel extends AbstractTableModel {
             }
             case 3:
                 return feeders.get(row).isEnabled();
+            case 4:
+            	 
+                 if (feeders.get(row).getPart() == null) return null;
+                 if (feeders.get(row).getPart().getPackage() == null) return null;
+            	return feeders.get(row).getPart().getPackage().getNozzleTip(feeders.get(row).getPart());
             default:
                 return null;
         }

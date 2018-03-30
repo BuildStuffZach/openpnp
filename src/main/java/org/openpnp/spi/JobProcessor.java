@@ -1,6 +1,7 @@
 package org.openpnp.spi;
 
 import org.openpnp.model.Job;
+import org.openpnp.model.Placement;
 
 public interface JobProcessor extends PropertySheetHolder, WizardConfigurable {
     public interface TextStatusListener {
@@ -20,6 +21,8 @@ public interface JobProcessor extends PropertySheetHolder, WizardConfigurable {
     public boolean canSkip();
     
     public boolean canIgnoreContinue();
+    
+    public void advFeeder();
 
     public void addTextStatusListener(TextStatusListener listener);
 

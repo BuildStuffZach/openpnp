@@ -886,6 +886,7 @@ public class JobPanel extends JPanel {
             String skipOption = "Skip";
             String ignoreContinueOption = "Ignore and Continue";
             String pauseOption = "Pause Job";
+            String advanceFeeder = "Adv feeder and try again";
 
             options.add(retryOption);
             if (jobProcessor.canSkip()) {
@@ -895,12 +896,19 @@ public class JobPanel extends JPanel {
             	options.add(ignoreContinueOption);
             }
             options.add(pauseOption);
+            options.add(advanceFeeder);
             int result = JOptionPane.showOptionDialog(getTopLevelAncestor(), t.getMessage(),
                     "Job Error", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE, null,
                     options.toArray(), retryOption);
             String selectedOption = options.get(result);
             if (selectedOption.equals(retryOption)) {
                 jobRun();
+            }
+            else if(selectedOption.equals(advanceFeeder))
+            {
+            	 UiUtils.submitUiMachineTask(() -> {
+            		 jobProcessor.advFeeder();
+                 });
             }
             // Skip
             else if (selectedOption.equals(skipOption)) {

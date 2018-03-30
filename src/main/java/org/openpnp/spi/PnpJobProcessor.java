@@ -6,6 +6,7 @@ import org.openpnp.model.BoardLocation;
 import org.openpnp.model.LengthUnit;
 import org.openpnp.model.Placement;
 
+
 public interface PnpJobProcessor extends JobProcessor {
 
     public List<JobPlacement> getJobPlacementsById(String id);
@@ -22,11 +23,14 @@ public interface PnpJobProcessor extends JobProcessor {
 
         public final BoardLocation boardLocation;
         public final Placement placement;
+       
+        
         public Status status = Status.Pending;
 
         public JobPlacement(BoardLocation boardLocation, Placement placement) {
             this.boardLocation = boardLocation;
             this.placement = placement;
+           
         }
 
         public double getPartHeight() {
@@ -34,9 +38,14 @@ public interface PnpJobProcessor extends JobProcessor {
                     .getValue();
         }
 
+     
+        
         @Override
         public String toString() {
             return placement.getId();
         }
+        
+        
+        
     }
 }

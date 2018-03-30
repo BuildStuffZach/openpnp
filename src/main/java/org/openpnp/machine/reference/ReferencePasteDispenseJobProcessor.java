@@ -330,6 +330,10 @@ public class ReferencePasteDispenseJobProcessor extends AbstractPasteDispenseJob
     protected void doSkip() throws Exception {
             //
     }
+    
+    public void advFeeder() {
+        //
+}
 
     protected boolean isJobComplete() {
         return jobDispenses.isEmpty();

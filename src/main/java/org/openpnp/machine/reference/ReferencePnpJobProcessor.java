@@ -244,6 +244,17 @@ public class ReferencePnpJobProcessor extends AbstractPnpJobProcessor {
     public boolean canIgnoreContinue() {
         return fsm.canSend(Message.IgnoreContinue);
     }
+    
+    public void advFeeder()
+    {
+    	        	
+    	try {
+			doFeedAndPick();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
 
     /**
      * Validate that there is a job set before allowing it to start.
